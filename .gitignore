@@ -172,3 +172,8 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Project-specific ignores
+__pycache__/
+venv/
+# pcap_files/ # - files used for testing
