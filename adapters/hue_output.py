@@ -4,8 +4,6 @@ from phue import Bridge
 from .output_adapter import OutputAdapter
 
 class HueOutputAdapter(OutputAdapter):
-    DEFAULT_BRIDGE_IP = "10.42.0.95" # Hardcoded for the purposes of the PoC
-    DEFAULT_LIGHT_NAME = "fluxlight"
 
     SMOOTH_STEPS = 20
     SMOOTH_DELAY = 0.1  # delay in seconds
@@ -28,8 +26,8 @@ class HueOutputAdapter(OutputAdapter):
 
 
     def __init__(self, bridge_ip: str = None, light_name: str = None):
-        self.bridge_ip = bridge_ip or self.DEFAULT_BRIDGE_IP
-        self.light_name = light_name or self.DEFAULT_LIGHT_NAME
+        self.bridge_ip = bridge_ip
+        self.light_name = light_name
         self.bridge = None
         self.light = None
         self._stop_event = threading.Event()

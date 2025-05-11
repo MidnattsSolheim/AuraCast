@@ -23,12 +23,14 @@ args = parser.parse_args()
 
 IS_TESTING = args.test
 
-# Config
-PCAP_FILE_PATH = "/home/sparklefran/netmon4/pcap_files/2017-12-29-Dreambot-infection-traffic.pcap"
-OUTPUT_DIR = "/var/log/suricata"
-PHUE_IP_ADDRESS = "10.42.0.95"
-LIGTHNAME = "fluxlight"
-base_dir = "/var/log/netmon_sessions/testing" if IS_TESTING else "/var/log/netmon_sessions"
+# Config import
+from config_loader import (
+    PCAP_FILE_PATH,
+    OUTPUT_DIR,
+    PHUE_IP_ADDRESS,
+    LIGHT_NAME,
+    BASE_DIR
+)
 
 # Check if running as root; if not, re-run with sudo
 if os.geteuid() != 0:
@@ -45,7 +47,7 @@ def setup_logging():
 def build_output_adapters(mode):
     adapters = []
     if mode in ("visualisation", "both"):
-        adapters.append(HueOutputAdapter(bridge_ip=PHUE_IP_ADDRESS, light_name=LIGTHNAME))
+        adapters.append(HueOutputAdapter(bridge_ip=PHUE_IP_ADDRESS, light_name=LIGHT_NAME))
     if mode in ("sonification", "both"):
         adapters.append(MusicOutputAdapter())
     if mode == "none":
@@ -66,12 +68,12 @@ def main():
     logging.info("Starting Network Monitor...")
 
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    session_dir = os.path.join(base_dir, f"session_{timestamp}")
+    session_dir = os.path.join(BASE_DIR, f"session_{timestamp}")
     os.makedirs(session_dir, exist_ok=True)
 
     alert_log_path = os.path.join(session_dir, "alert_log.txt")
 
-    ui = NetMonUI(base_dir=base_dir)
+    ui = NetMonUI(base_dir=BASE_DIR)
     ui.run()  # Blocks exec until input/output mode selected
 
     input_mode = ui.choices["input"]

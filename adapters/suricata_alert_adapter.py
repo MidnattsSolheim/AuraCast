@@ -6,11 +6,6 @@ import subprocess
 from .input_adapter import InputAdapter
 import math
 
-PCAP_FILE = "/home/sparklefran/netmon/emolol.pcap" # Hardcoded for the purposes of the PoC
-EVE_JSON_PATH = "/var/log/suricata/eve.json"
-INTERFACE = "wlo1"  # OBS: name might change
-
-
 from datetime import datetime
 
 def format_alert_summary(event):
