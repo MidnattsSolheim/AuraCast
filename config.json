@@ -1,8 +1,8 @@
 {
-    "PCAP_FILE_PATH": "/home/sparklefran/netmon4/pcap_files/2017-12-29-Dreambot-infection-traffic.pcap",
+    "PCAP_FILE_PATH": "/home/sparklefran/netmon4/pcap_files/noisywire.pcap",
     "OUTPUT_DIR": "/var/log/suricata",
     "PHUE_IP_ADDRESS": "10.42.0.95",
-    "LIGHT_NAME": "fluxlight",
+    "LIGHT_NAMES": ["fluxlight", "Sentinel"], 
     "BASE_DIR_TEST": "/var/log/netmon_sessions/testing",
     "BASE_DIR_PROD": "/var/log/netmon_sessions"
   }

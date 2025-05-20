@@ -28,7 +28,7 @@ from config_loader import (
     PCAP_FILE_PATH,
     OUTPUT_DIR,
     PHUE_IP_ADDRESS,
-    LIGHT_NAME,
+    LIGHT_NAMES,
     BASE_DIR
 )
 
@@ -47,7 +47,7 @@ def setup_logging():
 def build_output_adapters(mode):
     adapters = []
     if mode in ("visualisation", "both"):
-        adapters.append(HueOutputAdapter(bridge_ip=PHUE_IP_ADDRESS, light_name=LIGHT_NAME))
+        adapters.append(HueOutputAdapter(bridge_ip=PHUE_IP_ADDRESS, light_names=LIGHT_NAMES))
     if mode in ("sonification", "both"):
         adapters.append(MusicOutputAdapter())
     if mode == "none":

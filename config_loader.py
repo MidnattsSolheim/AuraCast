@@ -13,5 +13,5 @@ IS_TESTING = args.test
 PCAP_FILE_PATH = _raw_config["PCAP_FILE_PATH"]
 OUTPUT_DIR = _raw_config["OUTPUT_DIR"]
 PHUE_IP_ADDRESS = _raw_config["PHUE_IP_ADDRESS"]
-LIGHT_NAME = _raw_config["LIGHT_NAME"]
+LIGHT_NAMES = _raw_config["LIGHT_NAMES"]
 BASE_DIR = _raw_config["BASE_DIR_TEST"] if IS_TESTING else _raw_config["BASE_DIR_PROD"]

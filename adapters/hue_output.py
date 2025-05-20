@@ -25,11 +25,11 @@ class HueOutputAdapter(OutputAdapter):
     }
 
 
-    def __init__(self, bridge_ip: str = None, light_name: str = None):
+    def __init__(self, bridge_ip: str = None, light_names: str = None):
         self.bridge_ip = bridge_ip
-        self.light_name = light_name
+        self.light_names = light_names if light_names else []
         self.bridge = None
-        self.light = None
+        self.lights = []
         self._stop_event = threading.Event()
         self.thread = None
         self.event_queue = []
@@ -41,13 +41,17 @@ class HueOutputAdapter(OutputAdapter):
         try:
             self.bridge = Bridge(self.bridge_ip)
             self.bridge.connect()
-            lights = self.bridge.get_light_objects('name')
-            if self.light_name in lights:
-                self.light = lights[self.light_name]
-                self._connected = True
-                print(f"[HueOutputAdapter] Connected to bridge at {self.bridge_ip} and found light '{self.light_name}'.")
-            else:
-                print(f"[HueOutputAdapter] Light '{self.light_name}' not found.")
+            all_lights = self.bridge.get_light_objects('name')
+            self.lights = []
+
+            for name in self.light_names:
+                if name in all_lights:
+                    self.lights.append(all_lights[name])
+                    print(f"[HueOutputAdapter] Connected to light '{name}'.")
+                else:
+                    print(f"[HueOutputAdapter] Light '{name}' not found.")
+
+            self._connected = bool(self.lights)
         except Exception as e:
             print(f"[HueOutputAdapter] Error connecting to bridge: {e}")
             self._connected = False
@@ -74,21 +78,23 @@ class HueOutputAdapter(OutputAdapter):
             self.event_queue.append(event)
 
     def _process_event(self, event):
-        if self.light is None:
-            print("[HueOutputAdapter] No light available; skipping event.")
+        if not self.lights:
+            print("[HueOutputAdapter] No lights available; skipping event.")
             return
+
         final_score = event.get("alert_score", 0)
         print(f"[HueOutputAdapter] Processing alert score: {final_score}")
+
         if final_score >= 9:
-            colour = "purple"   # very high severity or massive volume
+            colour = "purple"
         elif final_score >= 6:
-            colour = "red"      # high severity or steady volume
+            colour = "red"
         elif final_score >= 4:
-            colour = "orange"   # elevated risk
+            colour = "orange"
         elif final_score >= 2:
-            colour = "yellow"   # mild concern
+            colour = "yellow"
         else:
-            colour = "green"    # quiet baseline; shows the lights are working
+            colour = "green"
 
         if final_score > 6 and event.get("contains_high_severity"):
             colour = "red"
@@ -96,8 +102,19 @@ class HueOutputAdapter(OutputAdapter):
 
         target_xy = self.COLORS[colour]
         target_brightness = self.BRIGHTNESS[colour]
-        print(f"[HueOutputAdapter] Setting light to {colour} (xy: {target_xy}, bri: {target_brightness})")
-        self._smooth_light_transition(self.light, target_xy, target_brightness)
+
+        threads = []
+        for light in self.lights:
+            print(f"[HueOutputAdapter] Setting '{light.name}' to {colour}")
+            t = threading.Thread(
+                target=self._smooth_light_transition,
+                args=(light, target_xy, target_brightness)
+            )
+            t.start()
+            threads.append(t)
+        for t in threads:
+            t.join()
+
 
     def _smooth_light_transition(self, light, target_xy, target_brightness):
         try:
@@ -144,10 +161,23 @@ class HueOutputAdapter(OutputAdapter):
         colour = "green"
         target_xy = self.COLORS[colour]
         target_brightness = self.BRIGHTNESS[colour]
-        self._smooth_light_transition(self.light, target_xy, target_brightness)
+
+        threads = []
+        for light in self.lights:
+            t = threading.Thread(
+                target=self._smooth_light_transition,
+                args=(light, target_xy, target_brightness)
+            )
+            t.start()
+            threads.append(t)
+
+        for t in threads:
+            t.join()
+
         self._stop_event.set()
         if self.thread and self.thread.is_alive():
             self.thread.join(timeout=2)
         self.event_queue.clear()
-        
+
         print("[HueOutputAdapter] Shutdown complete.")
+
