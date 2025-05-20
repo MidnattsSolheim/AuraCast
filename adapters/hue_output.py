@@ -96,7 +96,7 @@ class HueOutputAdapter(OutputAdapter):
         else:
             colour = "green"
 
-        if final_score > 6 and event.get("contains_high_severity"):
+        if final_score < 6 and event.get("contains_high_severity"):
             colour = "red"
             print("[HueOutputAdapter] High-severity alert present. Overriding to red.")
 
